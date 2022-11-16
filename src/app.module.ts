@@ -21,8 +21,4 @@ import { FacturaEntity } from './entities/factura.entity';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor() {
-    console.log('AQUÏ ', process.env.HOST);
-  }
-}
+export class AppModule { }

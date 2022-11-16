@@ -38,7 +38,6 @@ export class AppController {
       whitelist: true,
       forbidNonWhitelisted: true,
     }),) factura: FacturaDto): Promise<FacturaEntity> {
-    // const newFactura = new FacturaEntity(factura);
     return this.appService.create(factura);
   }
 
@@ -54,7 +53,6 @@ export class AppController {
     )
     factura: UpdateFacturaDto,
   ): Promise<UpdateResult> {
-    // const updatedFactura = new FacturaEntity(factura);
     return this.appService.update(id, factura);
   }
 
