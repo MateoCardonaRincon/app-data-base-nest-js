@@ -15,10 +15,14 @@ import { FacturaEntity } from './entities/factura.entity';
       password: 'MySQL_315660',
       database: 'facturacion',
       entities: [FacturaEntity, DetalleFacturaEntity],
-      synchronize: true,
+      synchronize: true
     }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {
+  constructor() {
+    console.log('AQUÏ ', process.env.HOST);
+  }
+}

@@ -1,4 +1,3 @@
-import { FacturaDetalleDto } from 'src/dto/factura-detalle.dto';
 import {
   Column,
   Entity,
@@ -27,7 +26,10 @@ export class DetalleFacturaEntity {
   @Column('bigint', { name: 'dtl_precio' })
   precio: number;
 
-  @Column('bigint', { name: 'dtl_total', default: () => "'0'" })
+  @Column({
+    generatedType: 'STORED',
+    asExpression: 'dtl_cantidad * dtl_precio'
+  })
   total: number;
 
   @ManyToOne(
@@ -37,11 +39,4 @@ export class DetalleFacturaEntity {
   )
   @JoinColumn([{ name: 'factura_id', referencedColumnName: 'id' }])
   factura: FacturaEntity;
-
-  constructor(detalleFactura?: FacturaDetalleDto) {
-    if (detalleFactura?.producto) this.producto = detalleFactura?.producto;
-    if (detalleFactura?.cantidad) this.cantidad = detalleFactura?.cantidad;
-    if (detalleFactura?.precio) this.precio = detalleFactura?.precio;
-    if (detalleFactura?.total) this.total = detalleFactura?.total;
-  }
 }

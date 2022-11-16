@@ -1,14 +1,13 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, UpdateResult } from 'typeorm';
+import { FacturaDto } from './dto/factura.dto';
+import { PartialUpdateFacturaDto } from './dto/partial-update-factura.dto';
+import { UpdateFacturaDto } from './dto/update-factura.dto';
 import { FacturaEntity } from './entities/factura.entity';
 
 @Injectable()
 export class AppService {
   constructor(private dataSource: DataSource) { }
-
-  getHello(): string {
-    return 'Hello World!';
-  }
 
   async getAll(): Promise<FacturaEntity[]> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -28,12 +27,30 @@ export class AppService {
     }
   }
 
-  async create(factura: FacturaEntity): Promise<FacturaEntity> {
+  async getById(id: number): Promise<FacturaEntity> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const newFactura = await queryRunner.manager.save(factura);
+      const factura = await queryRunner.manager.findOneByOrFail(FacturaEntity, { id });
+      await queryRunner.commitTransaction();
+      return Promise.resolve(factura);
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      throw new HttpException(
+        `Tenemos problemas para recuperar la factura con id ${id}`,
+        HttpStatus.CONFLICT,
+      );
+    }
+  }
+
+  async create(factura: FacturaDto): Promise<FacturaEntity> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const newFactura = await queryRunner.manager.save(FacturaEntity, factura);
       await queryRunner.commitTransaction();
       return Promise.resolve(newFactura);
     } catch (err) {
@@ -46,24 +63,43 @@ export class AppService {
     }
   }
 
-  async update(id: number, factura: FacturaEntity): Promise<FacturaEntity> {
+  async update(id: number, factura: UpdateFacturaDto): Promise<UpdateResult> {
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
     try {
-      const thisFactura = await queryRunner.manager.findOneByOrFail(FacturaEntity, { id });
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-      const updatedFactura = await queryRunner.manager.merge(FacturaEntity, thisFactura);
+      const updatedFactura = queryRunner.manager.update(FacturaEntity, { id }, factura);
 
-      console.log(thisFactura)
       await queryRunner.commitTransaction();
-      return Promise.resolve(updatedFactura);
+      return updatedFactura;
     } catch (err) {
       // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();
       throw new HttpException(
-        'No se encontró la factura con id ${id}',
+        `No se encontró la factura con id ${id}`,
+        HttpStatus.CONFLICT,
+      );
+    }
+  }
+
+  async partialUpdate(id: number, factura: PartialUpdateFacturaDto): Promise<UpdateResult> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const updatedFactura = queryRunner.manager.update(FacturaEntity, { id }, factura);
+
+      await queryRunner.commitTransaction();
+      return updatedFactura;
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      throw new HttpException(
+        `No se encontró la factura con id ${id}`,
         HttpStatus.CONFLICT,
       );
     }
@@ -75,14 +111,16 @@ export class AppService {
     await queryRunner.startTransaction();
     try {
       const deleteThisFactura = await queryRunner.manager.findOneByOrFail(FacturaEntity, { id });
-      const deletedFactura = await queryRunner.manager.remove(FacturaEntity, deleteThisFactura);
+      console.log(deleteThisFactura)
+      const removedFactura = await queryRunner.manager.remove(FacturaEntity, deleteThisFactura);
       await queryRunner.commitTransaction();
-      return Promise.resolve(deletedFactura);
+      console.log(removedFactura)
+      return Promise.resolve(removedFactura);
     } catch (err) {
       // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();
       throw new HttpException(
-        `Tenemos problemas para eliminar la factura con id ${id}`,
+        `No se pudo eliminar la factura con id ${id}, ya que no existe o tiene detalles relacionados`,
         HttpStatus.CONFLICT,
       );
     }

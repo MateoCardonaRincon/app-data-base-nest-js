@@ -23,15 +23,4 @@ export class FacturaEntity {
     { cascade: ['insert'], onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   detalleFactura: DetalleFacturaEntity[];
-
-  constructor(factura?: FacturaDto) {
-    this.clienteNombre = factura?.clienteNombre ?? '';
-    this.clienteCorreo = factura?.clienteCorreo ?? null;
-    if (factura?.detalleFactura && factura?.detalleFactura.length > 0) {
-      this.detalleFactura = new Array<DetalleFacturaEntity>();
-      factura.detalleFactura.forEach((data) =>
-        this.detalleFactura.push(new DetalleFacturaEntity(data)),
-      );
-    }
-  }
 }
