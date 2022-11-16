@@ -1,15 +1,15 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FacturaDto } from './dto/factura.dto';
 import { FacturaEntity } from './entities/factura.entity';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) { }
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getFacturas(): Promise<FacturaEntity[]> {
+    return this.appService.getAll();
   }
 
   @Post()
@@ -17,4 +17,20 @@ export class AppController {
     const newFactura = new FacturaEntity(factura);
     return this.appService.create(newFactura);
   }
+
+  @Put(':id')
+  updateFactura(@Param('id', ParseIntPipe) id: number, @Body() factura: FacturaDto): Promise<FacturaEntity> {
+    const updatedFactura = new FacturaEntity(factura);
+    return this.appService.update(id, updatedFactura);
+  }
+
+  // @Patch(':id')
+  // updateParcialFactura(@Param('id', ParseIntPipe) id: number, @Body() factura: FacturaDto): Promise<FacturaEntity> {
+  // }
+
+  @Delete(':id')
+  deleteFactura(@Param('id', ParseIntPipe) id: number): Promise<FacturaEntity> {
+    return this.appService.delete(id);
+  }
+
 }

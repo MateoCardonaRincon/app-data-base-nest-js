@@ -20,7 +20,7 @@ export class FacturaEntity {
   @OneToMany(
     () => DetalleFacturaEntity,
     (detalleFacturaEntity) => detalleFacturaEntity.factura,
-    { cascade: ['insert'], onDelete: 'RESTRICT', onUpdate: 'RESTRICT' },
+    { cascade: ['insert'], onDelete: 'RESTRICT', onUpdate: 'RESTRICT', eager: true },
   )
   detalleFactura: DetalleFacturaEntity[];
 

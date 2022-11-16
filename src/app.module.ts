@@ -12,13 +12,13 @@ import { FacturaEntity } from './entities/factura.entity';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '1234567890',
+      password: 'MySQL_315660',
       database: 'facturacion',
       entities: [FacturaEntity, DetalleFacturaEntity],
-      synchronize: false,
+      synchronize: true,
     }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
